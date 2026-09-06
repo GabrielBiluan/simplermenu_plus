@@ -11,14 +11,21 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Setup Multi-arch and Map ARM Ports Repository
+    - name: Setup Multi-arch and Clean Repositories
       run: |
         sudo dpkg --add-architecture armhf
         
-        # Configure sources so that standard repos only look for amd64, and ports looks for armhf
-        sudo sed -i 's/deb http/deb [arch=amd64] http/g' /etc/apt/sources.list.d/ubuntu.sources || true
-        sudo sed -i 's/deb https/deb [arch=amd64] https/g' /etc/apt/sources.list.d/ubuntu.sources || true
+        # Clear out any conflicting default source configs
+        sudo rm -f /etc/apt/sources.list /etc/apt/sources.list.d/*
         
+        # Write clean standard repositories for PC tools
+        echo "Types: deb
+        URIs: http://ubuntu.com http://ubuntu.com
+        Suites: noble noble-updates noble-security noble-backports
+        Components: main universe restricted multiverse
+        Architectures: amd64" | sudo tee /etc/apt/sources.list.d/amd64.sources
+
+        # Write clean ports repositories for ARM handheld files
         echo "Types: deb
         URIs: http://ubuntu.com
         Suites: noble noble-updates noble-security noble-backports
