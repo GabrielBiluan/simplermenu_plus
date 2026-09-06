@@ -11,18 +11,18 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Install dependencies
+    - name: Install ARM Cross-Compiler and Dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y build-essential libsdl1.2-dev libsdl-image1.2-dev libsdl-ttf2.0-dev libsdl-gfx1.2-dev libboost-locale-dev libboost-filesystem-dev rapidjson-dev
+        sudo apt-get install -y build-essential gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
 
-    - name: Compile Application
+    - name: Compile Application for RG35XX (ARM)
       run: |
         make clean
-        make
+        make CROSS_COMPILE=arm-linux-gnueabihf-
 
     - name: Upload Compiled Executable
       uses: actions/upload-artifact@v4
       with:
-        name: simplermenu_plus_build
+        name: simplermenu_plus_RG35XX
         path: output/
