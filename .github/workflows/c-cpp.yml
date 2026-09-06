@@ -11,37 +11,37 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Setup Multi-arch and Clean Repositories
-      run: |
-        sudo dpkg --add-architecture armhf
-        
-        # Clear out any conflicting default source configs
-        sudo rm -f /etc/apt/sources.list /etc/apt/sources.list.d/*
-        
-        # Write clean standard repositories for PC tools
-        echo "Types: deb
-        URIs: http://ubuntu.com http://ubuntu.com
-        Suites: noble noble-updates noble-security noble-backports
-        Components: main universe restricted multiverse
-        Architectures: amd64" | sudo tee /etc/apt/sources.list.d/amd64.sources
-
-        # Write clean ports repositories for ARM handheld files
-        echo "Types: deb
-        URIs: http://ubuntu.com
-        Suites: noble noble-updates noble-security noble-backports
-        Components: main universe restricted multiverse
-        Architectures: armhf" | sudo tee /etc/apt/sources.list.d/armhf.sources
-
-    - name: Install ARM Toolchain and Dependencies
+    - name: Install ARM Toolchain Cross-Compiler
       run: |
         sudo apt-get update
-        sudo apt-get install -y build-essential gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
-        sudo apt-get install -y libsdl1.2-dev:armhf libsdl-image1.2-dev:armhf libsdl-ttf2.0-dev:armhf libsdl-gfx1.2-dev:armhf libboost-locale-dev:armhf libboost-filesystem-dev:armhf rapidjson-dev
+        sudo apt-get install -y build-essential gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf wget
+
+    - name: Manual Extraction of ARM Dependencies
+      run: |
+        mkdir -p sysroot
+        cd sysroot
+        
+        # Download and extract the matching armhf architecture binaries from Ubuntu Ports
+        wget http://ubuntu.com || wget http://ubuntu.com || true
+        wget http://ubuntu.com || true
+        wget http://ubuntu.com || true
+        wget http://ubuntu.com || true
+        wget http://ubuntu.com || true
+        wget http://ubuntu.com || true
+        wget http://ubuntu.com || true
+        
+        # Extract files cleanly out of the package structures
+        for f in *.deb; do dpkg-deb -x "$f" . ; done
+        cd ..
 
     - name: Compile Application for RG35XX (ARM)
       run: |
         make clean
-        make CC=arm-linux-gnueabihf-gcc CXX=arm-linux-gnueabihf-g++
+        # Point the compiler explicitly to look inside our custom sysroot directory for the ARM library targets
+        make CC=arm-linux-gnueabihf-gcc CXX=arm-linux-gnueabihf-g++ \
+             CFLAGS="-I$GITHUB_WORKSPACE/sysroot/usr/include" \
+             CXXFLAGS="-I$GITHUB_WORKSPACE/sysroot/usr/include" \
+             LDFLAGS="-L$GITHUB_WORKSPACE/sysroot/usr/lib/arm-linux-gnueabihf"
 
     - name: Upload Compiled Executable
       uses: actions/upload-artifact@v4
