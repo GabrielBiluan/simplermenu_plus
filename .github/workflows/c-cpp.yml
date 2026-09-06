@@ -11,10 +11,12 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Install ARM Cross-Compiler and Dependencies
+    - name: Setup Multi-arch and Install ARM Dependencies
       run: |
+        sudo dpkg --add-architecture armhf
         sudo apt-get update
         sudo apt-get install -y build-essential gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
+        sudo apt-get install -y libsdl1.2-dev:armhf libsdl-image1.2-dev:armhf libsdl-ttf2.0-dev:armhf libsdl-gfx1.2-dev:armhf libboost-locale-dev:armhf libboost-filesystem-dev:armhf rapidjson-dev
 
     - name: Compile Application for RG35XX (ARM)
       run: |
