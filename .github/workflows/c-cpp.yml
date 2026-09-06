@@ -21,7 +21,7 @@ jobs:
     - name: Compile Application for RG35XX (ARM)
       run: |
         make clean
-        make CROSS_COMPILE=arm-linux-gnueabihf-
+        make CC=arm-linux-gnueabihf-gcc CXX=arm-linux-gnueabihf-g++
 
     - name: Upload Compiled Executable
       uses: actions/upload-artifact@v4
